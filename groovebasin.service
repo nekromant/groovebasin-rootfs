@@ -1,0 +1,11 @@
+[Unit]
+Description=groovebasin music player
+Documentation=http://groovebasin.com/
+
+[Service]
+User=root
+ExecStart=/usr/bin/groovebasin
+WorkingDirectory=/srv/groovebasin/
+
+[Install]
+WantedBy=multi-user.target

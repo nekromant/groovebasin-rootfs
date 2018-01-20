@@ -1,0 +1,61 @@
+# This file shows a simple debian armel rootfs creation process
+#
+
+MULTISTRAP armhf debian-base.conf
+DPKG_CONFIGURE silent
+
+#Basic system setup
+PASSWD 12345678
+HOSTNAME iceshard
+LOCALE en_US.UTF8 UTF8
+
+#Enable root access over ssh
+RUN 'echo "PermitRootLogin yes" >> /etc/ssh/sshd_config'
+
+#Alsa mixer webui
+INSTALL /etc/resolv.conf
+RUN apt-get update -y
+
+ADD_DEB https://github.com/JiriSko/amixer-webui/releases/download/v0.4.0/amixer-webui_0.4.0_all.deb
+RUN update-rc.d amixer-webui defaults
+
+
+ADD_DEB ./aura-debs/*.deb
+#tmpfs for longer SD life
+RUN "echo RAMTMP=yes >> /etc/default/tmpfs"
+
+#Install kernel debs
+cp fstab rootfs/etc/fstab
+ADD_PACKAGES initramfs-tools
+ADD_DEB ../linux-kernel-package/*.deb
+
+
+# WiFi support 
+ADD_PACKAGES wireless-tools
+cp wlan0 rootfs/etc/network/interfaces.d
+
+# Now, install cron and scripts
+ADD_PACKAGES cron
+cp bin/* rootfs/usr/local/bin/
+cp iceshard.conf rootfs/etc/
+
+# Install fan control cron task
+RUN 'echo "* *    * * *    root    /usr/local/bin/fan-ctl" >> /etc/crontab'
+
+RUN 'echo "COLLECTIONDISK=/dev/disk/by-uuid/2B234EA2293F197A" >> /etc/groovedisk'
+
+RUN mkdir -p /etc/systemd/system/
+cp groovebasin.service rootfs/etc/systemd/system/
+cp groove-mount.service rootfs/etc/systemd/system/
+
+cp -f nginx-default rootfs/etc/nginx/sites-available/default
+
+RUN systemctl enable groovebasin 
+RUN systemctl enable groove-mount
+cp asound.conf rootfs/etc/
+
+UIMAGE 0x40008000
+BOOTSCRIPT boot.scr.in sun4i-a10-cs102ii.dtb
+#Package a rootfs tarball
+STORE rootfs.tgz
+

@@ -1,0 +1,24 @@
+#!/bin/sh -e
+export PATH=$PATH:/usr/local/bin:/usr/bin/:/usr/sbin
+
+[ -f /etc/default/groovedisk ] || exit 1
+. /etc/default/groovedisk
+
+shard-ctl --usb 1 on 
+sleep 3
+shard-ctl --usb 2 on
+sleep 3
+
+shard-ctl --relay 1 on
+sleep 1
+shard-ctl --relay 2 on
+
+DISK=${COLLECTIONDISK}
+
+while [ ! -e $DISK ]; do
+	sleep 1
+done
+
+mount $DISK /srv/ -o nls=utf8
+
+exit 0

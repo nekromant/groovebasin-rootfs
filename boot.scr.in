@@ -1,0 +1,6 @@
+setenv KVERSION @KVERSION@
+setenv DTB @DTB@
+ext4load mmc 0:1 ${kernel_addr_r} /boot/vmlinuz-${KVERSION}
+ext4load mmc 0:1 ${fdt_addr_r} /usr/lib/linux-image-${KVERSION}/${DTB}
+ext4load mmc 0:1 ${ramdisk_addr_r} /boot/uInitrd
+bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}

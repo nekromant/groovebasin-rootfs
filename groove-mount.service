@@ -1,0 +1,11 @@
+[Unit]
+Description=groovebasin disk mounter
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/groovemount
+WorkingDirectory=/
+
+[Install]
+WantedBy=groovebasin.service

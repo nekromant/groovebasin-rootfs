@@ -1,0 +1,6 @@
+auto wlan0
+iface wlan0 inet dhcp
+        wpa-ssid frostgate
+        wpa-psk  hackme
+        post-up  ntpdate -s arvale.lab
+

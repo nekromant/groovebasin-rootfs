@@ -1,0 +1,35 @@
+#!/bin/bash
+
+IDLE_SLEEP_DELAY=120
+export PATH=$PATH:/usr/local/bin/
+
+check_if_playing()
+{
+	STATUS="`mpc status | sed -n 2p| sed 's/.*\[\([^]]*\)\].*/\1/g'`"
+	echo "Player status: $STATUS"
+	[ "$STATUS" == "playing" ]
+}
+
+
+STATE="OFF"
+while true; do
+	mpc idle > /dev/null
+	check_if_playing
+
+	if [ "$?" -eq "0" ] && [ "$STATE" == "OFF" ]; then
+		shard-ctl --relay 1 on 2>/dev/null
+		sleep 1
+		shard-ctl --relay 2 on 2>/dev/null
+		STATE="ON"
+		continue
+	fi
+
+	sleep $IDLE_SLEEP_DELAY
+	check_if_playing
+        if [ ! "$?" -eq "0" ] && [ "$STATE" == "ON" ]; then
+                shard-ctl --relay 1 off 2>/dev/null
+		sleep 1
+                shard-ctl --relay 2 off 2>/dev/null
+		STATE="OFF"
+        fi
+done

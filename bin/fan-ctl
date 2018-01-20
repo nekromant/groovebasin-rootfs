@@ -1,0 +1,13 @@
+#!/bin/bash
+
+TEMP=`smartctl -A /dev/sda|grep Temperature_Celsius|awk '{print $10}'`
+if [ $TEMP -lt "35" ]; then
+	shard-ctl --relay 3 off
+fi
+
+if [ $TEMP -gt "40" ]; then
+	shard-ctl --relay 3 on
+fi
+
+echo "Current temp: $TEMP" 
+
